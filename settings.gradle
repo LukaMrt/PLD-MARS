@@ -1,3 +1,5 @@
 rootProject.name = 'pld-mars'
-include 'pld-mars-ihm', 'pld-mars-sma'
-
+include 'ihm'
+include 'sma'
+include 'om-account'
+include 'common'
