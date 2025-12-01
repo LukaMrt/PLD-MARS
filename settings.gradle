@@ -1,0 +1,3 @@
+rootProject.name = 'pld-mars'
+include 'pld-mars-ihm', 'pld-mars-sma'
+
