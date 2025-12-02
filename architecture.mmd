@@ -1,0 +1,106 @@
+%% Architecture PLD-MARS
+%% Service-Oriented Architecture (SOA) multi-tiers
+
+graph TB
+    subgraph Browser["🌐 Browser"]
+        User[User Interface]
+    end
+
+    subgraph IHM["IHM Layer - Port 8080<br/>Presentation"]
+        IhmServlet[IhmServlet<br/>?action=actionName]
+        IhmService[IhmService]
+        IhmActions[Actions<br/>ListAccountsAction<br/>AddAccountAction<br/>AddAddressAction]
+        IhmVues[Vues<br/>JSON Rendering]
+
+        IhmServlet --> IhmActions
+        IhmActions --> IhmService
+        IhmService --> IhmVues
+    end
+
+    subgraph SMA["SMA Layer - Port 8081<br/>Business Logic"]
+        SmaServlet[SmaServlet<br/>?SMA=smaName]
+        SmaService[ServiceMetierApplicatif<br/>Orchestration]
+        SmaActions[Actions<br/>Business Rules]
+        SmaVues[Vues<br/>JSON Rendering]
+
+        SmaServlet --> SmaActions
+        SmaActions --> SmaService
+        SmaService --> SmaVues
+    end
+
+    subgraph OM_Account["OM-Account Layer - Port 8091<br/>Data Model"]
+        AccountServlet[AccountServlet<br/>?SOM=somName]
+        AccountService[AccountService<br/>Transactions]
+        AccountDAO[AccountDAO<br/>Data Access]
+        AccountEntity[Account Entity<br/>@Entity]
+        AccountJpaUtil[JpaUtil<br/>EntityManager]
+
+        AccountServlet --> AccountService
+        AccountService --> AccountDAO
+        AccountDAO --> AccountJpaUtil
+        AccountJpaUtil --> AccountEntity
+    end
+
+    subgraph OM_Address["OM-Address Layer - Port 8092<br/>Data Model"]
+        AddressServlet[AddressServlet<br/>?SOM=somName]
+        AddressService[AddressService<br/>Transactions]
+        AddressDAO[AddressDAO<br/>Data Access]
+        AddressEntity[Address Entity<br/>@Entity<br/>accountId FK]
+        AddressJpaUtil[JpaUtil<br/>EntityManager]
+
+        AddressServlet --> AddressService
+        AddressService --> AddressDAO
+        AddressDAO --> AddressJpaUtil
+        AddressJpaUtil --> AddressEntity
+    end
+
+    subgraph Database["🗄️ MySQL Database - Port 3306"]
+        DB[(pld-mars<br/>Tables:<br/>- account<br/>- address)]
+    end
+
+    subgraph Common["📦 Common Library<br/>Shared Utilities"]
+        JsonHttpClient[JsonHttpClient<br/>HTTP/JSON Client]
+        JsonServletHelper[JsonServletHelper<br/>Response Helper]
+        Exceptions[Custom Exceptions<br/>ServiceException<br/>DBException]
+        MicroCasFilter[MicroCasFilter<br/>Authentication]
+    end
+
+    %% Communication flows
+    User -->|HTTP/JSON| IhmServlet
+    IhmService -->|HTTP POST<br/>JsonHttpClient| SmaServlet
+    SmaService -->|HTTP POST<br/>JsonHttpClient| AccountServlet
+    SmaService -->|HTTP POST<br/>JsonHttpClient| AddressServlet
+    AccountJpaUtil -->|JPA/JDBC| DB
+    AddressJpaUtil -->|JPA/JDBC| DB
+
+    %% Common library usage
+    IhmService -.->|uses| JsonHttpClient
+    SmaService -.->|uses| JsonHttpClient
+    IhmVues -.->|uses| JsonServletHelper
+    SmaVues -.->|uses| JsonServletHelper
+
+    %% Configuration
+    subgraph Config["⚙️ Configuration"]
+        ENV[.env<br/>DATABASE_URL<br/>DATABASE_SCHEMA_ACTION<br/>SOM_ACCOUNT_URL<br/>SOM_ADDRESS_URL<br/>SMA_URL]
+    end
+
+    ENV -.->|env vars| AccountJpaUtil
+    ENV -.->|env vars| AddressJpaUtil
+    ENV -.->|URLs| IhmService
+    ENV -.->|URLs| SmaService
+
+    %% Styling
+    classDef presentation fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    classDef business fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef data fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef database fill:#ffebee,stroke:#b71c1c,stroke-width:2px
+    classDef common fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef config fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+
+    class IHM,IhmServlet,IhmService,IhmActions,IhmVues presentation
+    class SMA,SmaServlet,SmaService,SmaActions,SmaVues business
+    class OM_Account,AccountServlet,AccountService,AccountDAO,AccountEntity,AccountJpaUtil data
+    class OM_Address,AddressServlet,AddressService,AddressDAO,AddressEntity,AddressJpaUtil data
+    class Database,DB database
+    class Common,JsonHttpClient,JsonServletHelper,Exceptions,MicroCasFilter common
+    class Config,ENV config

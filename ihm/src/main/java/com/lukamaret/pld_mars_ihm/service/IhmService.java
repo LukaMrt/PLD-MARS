@@ -54,4 +54,18 @@ public class IhmService {
             throw JsonServletHelper.ServiceMetierCallException(this.smaUrl, "addAccount", e);
         }
     }
+
+    public void createAddress(String street, String city, Integer accountId) throws ServiceException {
+        try {
+            this.httpClient.post(
+                    this.smaUrl,
+                    new JsonHttpClient.Parameter("SMA", "addAddress"),
+                    new JsonHttpClient.Parameter("street", street),
+                    new JsonHttpClient.Parameter("city", city),
+                    new JsonHttpClient.Parameter("accountId", String.valueOf(accountId))
+            );
+        } catch (IOException e) {
+            throw JsonServletHelper.ServiceMetierCallException(this.smaUrl, "addAddress", e);
+        }
+    }
 }

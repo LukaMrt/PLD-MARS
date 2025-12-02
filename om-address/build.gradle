@@ -36,6 +36,5 @@ gretty {
     servletContainer = 'tomcat11'
     jvmArgs = envVars.collect { key, value -> "-D${key}=${value}" }
     scanInterval = 0
-    httpPort = envVars.getOrDefault('SOM_ACCOUNT_PORT', '8091') as Integer
+    httpPort = envVars.getOrDefault('SOM_ADDRESS_PORT', '8092') as Integer
 }
-

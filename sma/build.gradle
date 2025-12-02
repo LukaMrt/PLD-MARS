@@ -33,5 +33,5 @@ gretty {
     servletContainer = 'tomcat11'
     jvmArgs = envVars.collect { key, value -> "-D${key}=${value}" }
     scanInterval = 0
-    httpPort = 8081
+    httpPort = envVars.getOrDefault('SMA_PORT', '8081') as Integer
 }

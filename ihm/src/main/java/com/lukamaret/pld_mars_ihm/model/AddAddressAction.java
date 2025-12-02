@@ -6,27 +6,34 @@ import com.lukamaret.pld_mars_common.exception.ServiceException;
 import com.lukamaret.pld_mars_ihm.service.IhmService;
 import jakarta.servlet.http.HttpServletRequest;
 
-public class AddAccountAction extends Action {
+public class AddAddressAction extends Action {
     private final IhmService service;
 
-    public AddAccountAction(IhmService service) {
+    public AddAddressAction(IhmService service) {
         this.service = service;
     }
 
     @Override
     public void execute(HttpServletRequest request) throws ServiceException {
-        String name;
+        String street;
+        String city;
+        Integer accountId;
+
         JsonObject body = getBody(request);
         if (body == null) {
-            name = request.getParameter("name");
+            street = request.getParameter("street");
+            city = request.getParameter("city");
+            accountId = Integer.parseInt(request.getParameter("accountId"));
         } else {
-            name = body.get("name").getAsString();
+            street = body.get("street").getAsString();
+            city = body.get("city").getAsString();
+            accountId = body.get("accountId").getAsInt();
         }
 
         try {
-            service.createAccount(name);
+            service.createAddress(street, city, accountId);
         } catch (Exception e) {
-            throw JsonServletHelper.ServiceMetierExecutionException("addAccount", e);
+            throw JsonServletHelper.ServiceMetierExecutionException("addAddress", e);
         }
 
         request.setAttribute("code", 200);

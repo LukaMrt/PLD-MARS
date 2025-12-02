@@ -5,9 +5,11 @@ import com.lukamaret.pld_mars_common.JsonHttpClient;
 import com.lukamaret.pld_mars_common.JsonServletHelper;
 import com.lukamaret.pld_mars_common.exception.ServiceException;
 import com.lukamaret.pld_mars_sma.model.AddAccountAction;
+import com.lukamaret.pld_mars_sma.model.AddAddressAction;
 import com.lukamaret.pld_mars_sma.model.ListAccountsAction;
 import com.lukamaret.pld_mars_sma.service.ServiceMetierApplicatif;
 import com.lukamaret.pld_mars_sma.vue.AddAccountVue;
+import com.lukamaret.pld_mars_sma.vue.AddAddressVue;
 import com.lukamaret.pld_mars_sma.vue.ListAccountsVue;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -41,7 +43,8 @@ public class SmaServlet extends HttpServlet {
         }
 
         ServiceMetierApplicatif serviceMetierApplicatif = new ServiceMetierApplicatif(
-                System.getProperties().getOrDefault("SOM_ACCOUNT_URL", "http://localhost:8081/som/account").toString(),
+                System.getProperties().getOrDefault("SOM_ACCOUNT_URL", "http://localhost:8091/om-account/api").toString(),
+                System.getProperties().getOrDefault("SOM_ADDRESS_URL", "http://localhost:8092/om-address/api").toString(),
                 new JsonHttpClient(),
                 new Gson()
         );
@@ -54,6 +57,10 @@ public class SmaServlet extends HttpServlet {
                 case "addAccount":
                     new AddAccountAction(serviceMetierApplicatif).execute(request);
                     new AddAccountVue().serialize(request, response);
+                    break;
+                case "addAddress":
+                    new AddAddressAction(serviceMetierApplicatif).execute(request);
+                    new AddAddressVue().serialize(request, response);
                     break;
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown SMA action : " + sma);

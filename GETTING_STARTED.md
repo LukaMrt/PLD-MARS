@@ -6,7 +6,8 @@ Guide de démarrage rapide pour les développeurs.
 
 ## Architecture du projet
 
-**PLD-MARS** est une application Java multi-tiers suivant une architecture SOA (Service-Oriented Architecture) avec 4 modules :
+**PLD-MARS** est une application Java multi-tiers suivant une architecture SOA (Service-Oriented Architecture) avec 5
+modules :
 
 ```
 Browser (http://localhost:8080)
@@ -16,6 +17,7 @@ IHM (Interface Homme-Machine) - Port 8080
 SMA (Service Métier Applicatif) - Port 8081
     ↓ HTTP/JSON
 OM-Account (Objet Métier) - Port 8091
+OM-Address (Objet Métier) - Port 8092
     ↓ JPA/JDBC
 MySQL Database - Port 3306
 ```
@@ -25,9 +27,11 @@ MySQL Database - Port 3306
 - **common** : Bibliothèque partagée (JsonHttpClient, exceptions, helpers)
 - **ihm** : Couche présentation (HTML, JavaScript, servlets)
 - **sma** : Couche logique métier (orchestration des services)
-- **om-account** : Couche données (entités JPA, DAO, accès base de données)
+- **om-account** : Couche données Account (entités JPA, DAO, accès base de données)
+- **om-address** : Couche données Address (entités JPA, DAO, accès base de données)
 
-Chaque couche communique avec la suivante via **HTTP/JSON**. Les modules sont indépendants et tournent sur des ports différents.
+Chaque couche communique avec la suivante via **HTTP/JSON**. Les modules sont indépendants et tournent sur des ports
+différents.
 
 ---
 
@@ -83,15 +87,17 @@ docker compose up -d
 ```
 
 Vérifier que MySQL tourne :
+
 ```bash
 docker ps
 ```
 
 ### 4. Démarrer les services (dans l'ordre)
 
-Ouvrez **3 terminaux différents** :
+Ouvrez **4 terminaux différents** :
 
 **Terminal 1 - OM-Account (Port 8091)** :
+
 ```bash
 cd om-account
 ./gradlew appRun
@@ -99,7 +105,17 @@ cd om-account
 
 Attendez le message : `Tomcat 11.0.13 started and listening on port 8091`
 
-**Terminal 2 - SMA (Port 8081)** :
+**Terminal 2 - OM-Address (Port 8092)** :
+
+```bash
+cd om-address
+./gradlew appRun
+```
+
+Attendez le message : `Tomcat 11.0.13 started and listening on port 8092`
+
+**Terminal 3 - SMA (Port 8081)** :
+
 ```bash
 cd sma
 ./gradlew appRun
@@ -107,7 +123,8 @@ cd sma
 
 Attendez le message : `Tomcat 11.0.13 started and listening on port 8081`
 
-**Terminal 3 - IHM (Port 8080)** :
+**Terminal 4 - IHM (Port 8080)** :
+
 ```bash
 cd ihm
 ./gradlew appRun
@@ -198,7 +215,7 @@ pld-mars/
 │   └── src/main/java/
 │       └── com/lukamaret/pld_mars_sma/
 │           ├── controller/    # Servlets
-│           ├── service/       # Appels HTTP vers OM-Account
+│           ├── service/       # Appels HTTP vers OMs
 │           ├── model/         # Actions
 │           └── vue/           # Rendu JSON
 │
@@ -208,6 +225,17 @@ pld-mars/
 │           ├── controller/    # Servlets
 │           ├── service/       # Logique métier + transactions
 │           ├── domain/        # Entités JPA (Account)
+│           ├── infrastructure/# DAO
+│           ├── model/         # Actions
+│           ├── vue/           # Rendu JSON
+│           └── utils/         # JpaUtil
+│
+├── om-address/                # Objet Métier Address
+│   └── src/main/java/
+│       └── com/lukamaret/pld_mars_address/
+│           ├── controller/    # Servlets
+│           ├── service/       # Logique métier + transactions
+│           ├── domain/        # Entités JPA (Address)
 │           ├── infrastructure/# DAO
 │           ├── model/         # Actions
 │           ├── vue/           # Rendu JSON

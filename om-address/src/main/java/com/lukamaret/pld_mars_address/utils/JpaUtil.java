@@ -1,4 +1,4 @@
-package com.lukamaret.pld_mars_account.utils;
+package com.lukamaret.pld_mars_address.utils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -11,7 +11,7 @@ import java.util.Map;
  * @author DASI Team
  */
 public class JpaUtil {
-    public static final String PERSISTENCE_UNIT_NAME = "com.lukamaret.pld_mars_account";
+    public static final String PERSISTENCE_UNIT_NAME = "com.lukamaret.pld_mars_address";
 
     private static EntityManagerFactory entityManagerFactory = null;
 

@@ -5,9 +5,11 @@ import com.lukamaret.pld_mars_common.JsonHttpClient;
 import com.lukamaret.pld_mars_common.JsonServletHelper;
 import com.lukamaret.pld_mars_common.exception.ServiceException;
 import com.lukamaret.pld_mars_ihm.model.AddAccountAction;
+import com.lukamaret.pld_mars_ihm.model.AddAddressAction;
 import com.lukamaret.pld_mars_ihm.model.ListAccountsAction;
 import com.lukamaret.pld_mars_ihm.service.IhmService;
 import com.lukamaret.pld_mars_ihm.vue.AddAccountVue;
+import com.lukamaret.pld_mars_ihm.vue.AddAddressVue;
 import com.lukamaret.pld_mars_ihm.vue.ListAccountsVue;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -46,6 +48,10 @@ public class IhmServlet extends HttpServlet {
                 case "addAccount":
                     new AddAccountAction(ihmService).execute(request);
                     new AddAccountVue().serialize(request, response);
+                    break;
+                case "addAddress":
+                    new AddAddressAction(ihmService).execute(request);
+                    new AddAddressVue().serialize(request, response);
                     break;
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown IHM action : " + action);

@@ -18,26 +18,35 @@
             list-style: none;
             padding: 0;
         }
-        #userList li {
+        .account-item {
             padding: 10px;
             margin: 5px 0;
-            background-color: #f4f4f4;
+            background-color: #e3f2fd;
             border-radius: 4px;
+            font-weight: bold;
         }
-        .add-user-form {
+        .address-item {
+            padding: 8px;
+            margin: 2px 0 2px 30px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .add-form {
             margin-bottom: 30px;
             padding: 20px;
             background-color: #e9ecef;
             border-radius: 8px;
         }
-        .add-user-form input {
+        .add-form input, .add-form select {
             padding: 10px;
             width: 300px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+            margin-bottom: 10px;
         }
-        .add-user-form button {
+        .add-form button {
             padding: 10px 20px;
             margin-left: 10px;
             background-color: #007bff;
@@ -47,36 +56,92 @@
             cursor: pointer;
             font-size: 14px;
         }
-        .add-user-form button:hover {
+        .add-form button:hover {
             background-color: #0056b3;
+        }
+        .form-row {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-<h1>Liste des utilisateurs</h1>
+<h1>Liste des utilisateurs et leurs adresses</h1>
 
-<div class="add-user-form">
-    <input type="text" id="nameInput" placeholder="Nom de l'utilisateur">
-    <button onclick="addUser()">Ajouter</button>
+<div class="add-form">
+    <h3>Ajouter un utilisateur</h3>
+    <div class="form-row">
+        <input type="text" id="nameInput" placeholder="Nom de l'utilisateur">
+        <button onclick="addUser()">Ajouter utilisateur</button>
+    </div>
+</div>
+
+<div class="add-form">
+    <h3>Ajouter une adresse</h3>
+    <div class="form-row">
+        <select id="accountSelect">
+            <option value="">Sélectionner un compte</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="text" id="streetInput" placeholder="Rue">
+    </div>
+    <div class="form-row">
+        <input type="text" id="cityInput" placeholder="Ville">
+    </div>
+    <div class="form-row">
+        <button onclick="addAddress()">Ajouter l'adresse</button>
+    </div>
 </div>
 
 <ul id="userList"></ul>
 
 <script>
+    let accountsData = [];
+
     function loadUsers() {
         fetch('api?action=listAccounts')
             .then(response => response.json())
             .then(data => {
-                const userList = document.getElementById('userList');
-                userList.innerHTML = '';
-                const accounts = data.accounts || [];
-                accounts.forEach(account => {
-                    const li = document.createElement('li');
-                    li.textContent = `ID: ${account.id} - Name: ${account.name}`;
-                    userList.appendChild(li);
-                });
+                accountsData = data.accounts || [];
+                displayUsers(accountsData);
+                updateAccountSelect(accountsData);
             })
             .catch(error => console.error('Erreur:', error));
+    }
+
+    function displayUsers(accounts) {
+        const userList = document.getElementById('userList');
+        userList.innerHTML = '';
+
+        accounts.forEach(account => {
+            // Create account element
+            const accountLi = document.createElement('li');
+            accountLi.className = 'account-item';
+            accountLi.textContent = `ID: ${account.id} - Name: ${account.name}`;
+            userList.appendChild(accountLi);
+
+            // Create address elements (indented)
+            if (account.addresses && account.addresses.length > 0) {
+                account.addresses.forEach(address => {
+                    const addressLi = document.createElement('li');
+                    addressLi.className = 'address-item';
+                    addressLi.textContent = `→ ${address.street}, ${address.city}`;
+                    userList.appendChild(addressLi);
+                });
+            }
+        });
+    }
+
+    function updateAccountSelect(accounts) {
+        const accountSelect = document.getElementById('accountSelect');
+        accountSelect.innerHTML = '<option value="">Sélectionner un compte</option>';
+
+        accounts.forEach(account => {
+            const option = document.createElement('option');
+            option.value = account.id;
+            option.textContent = `${account.name} (ID: ${account.id})`;
+            accountSelect.appendChild(option);
+        });
     }
 
     function addUser() {
@@ -101,6 +166,49 @@
                     loadUsers();
                 } else {
                     alert('Erreur lors de l\'ajout de l\'utilisateur');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    function addAddress() {
+        const accountSelect = document.getElementById('accountSelect');
+        const streetInput = document.getElementById('streetInput');
+        const cityInput = document.getElementById('cityInput');
+
+        const accountId = accountSelect.value;
+        const street = streetInput.value.trim();
+        const city = cityInput.value.trim();
+
+        if (!accountId) {
+            alert('Veuillez sélectionner un compte');
+            return;
+        }
+
+        if (!street || !city) {
+            alert('Veuillez entrer une rue et une ville');
+            return;
+        }
+
+        fetch('api?action=addAddress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                accountId: parseInt(accountId),
+                street: street,
+                city: city
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    streetInput.value = '';
+                    cityInput.value = '';
+                    accountSelect.value = '';
+                    loadUsers();
+                } else {
+                    alert('Erreur lors de l\'ajout de l\'adresse');
                 }
             })
             .catch(error => console.error('Erreur:', error));
